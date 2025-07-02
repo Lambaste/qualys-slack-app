@@ -6,8 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
-# terraform
-*.tfstate
+# Terraform artifacts
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
 lambda/app.zip
 
 # Distribution / packaging
