@@ -1,0 +1,9 @@
+slack_bolt==1.19.1
+slack_sdk==3.31.0
+requests==2.32.3
+boto3
+botocore
+urllib3==1.26.18
+charset_normalizer==3.3.2
+idna==3.7
+certifi==2024.7.4
