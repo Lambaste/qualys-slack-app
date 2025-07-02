@@ -1,88 +1,126 @@
-# qualys-slack-app
+# Qualys Slack App
 
-A serverless application to integrate Qualys with Slack using AWS Lambda and API Gateway.
-
-## Overview
-
-This project provides infrastructure and code to deploy a Slack app that interacts with Qualys APIs. It is designed to run as an AWS Lambda function, with deployment and permissions managed by Terraform. The Lambda function receives Slack events via an HTTP endpoint (API Gateway), fetches secrets from AWS Secrets Manager, and communicates with the Qualys API.
+This application provides integration between Qualys and Slack, allowing you to receive Qualys alerts directly in your Slack workspace via AWS Lambda.
 
 ## Features
 
-- **Serverless backend:** Built using AWS Lambda (Python 3.11)
-- **Slack integration:** Exposes an endpoint for Slack events (/slack/events)
-- **Qualys API integration:** Uses secrets stored in AWS Secrets Manager to authenticate with Qualys
-- **Infrastructure as Code:** All AWS resources are provisioned using Terraform
+- Receives Qualys alerts/events via AWS Lambda
+- Forwards alerts to configured Slack channels using Slack Bolt
+- Easily deployable with Terraform
 
-## Architecture
+## Requirements
 
-- **AWS Lambda:** Hosts the application logic (`lambda/app.zip`)
-- **API Gateway:** Provides an HTTP endpoint for Slack to send events
-- **AWS Secrets Manager:** Stores Qualys and Slack credentials
-- **IAM Roles & Policies:** Restricts Lambda and API Gateway permissions
-- **CloudWatch:** Logs API Gateway activity
+- Python 3.8+
+- AWS account with permissions to deploy Lambda and related resources
+- Slack App credentials (Bot Token, Signing Secret)
+- Terraform (for IaC deployment)
 
-## Prerequisites
+## Directory Structure
 
-- AWS account and credentials with permission to create Lambda, API Gateway, IAM, Secrets Manager resources
-- Terraform >= 1.0
-- Python 3.11 (for the Lambda function code)
-- Slack app and credentials (signing secret, bot token)
-- Qualys API credentials
+```
+qualys-slack-app/
+├── lambda/
+│   ├── app.py                  # Lambda function source code
+│   └── requirements.txt        # Python dependencies for Lambda
+├── terraform/
+│   ├── main.tf                 # Terraform configuration files
+│   ├── variables.tf
+│   ├── outputs.tf
+│   └── terraform.tfvars        # (not committed if sensitive)
+├── .gitignore
+├── README.md
+├── LICENSE
+```
 
-## Quickstart
+## Setup & Deployment
 
-1. **Clone this repository**
+### 1. Clone the Repository
 
-    ```bash
-    git clone https://github.com/Lambaste/qualys-slack-app.git
-    cd qualys-slack-app
-    ```
+```bash
+git clone https://github.com/your-org/qualys-slack-app.git
+cd qualys-slack-app
+```
 
-2. **Configure Secrets in AWS Secrets Manager**
+### 2. Prepare the Lambda Deployment Package
 
-    - Create secrets for Qualys API and Slack app (see `terraform/terraform.tfvars` for variable names).
+**Do not commit the deployment zip file to the repository.**  
+Instead, build it locally as follows:
 
-3. **Customize Terraform variables**
+```bash
+cd lambda
+pip3 install -r requirements.txt -t .
+zip -r app.zip .
+```
 
-    Edit `terraform/terraform.tfvars`:
+This will create `app.zip` containing your Lambda function and all its dependencies.
 
-    ```hcl
-    qualy_secret_name  = "your-qualys-secret-name"
-    slack_secret_name  = "your-slack-secret-name"
-    qualy_secret_arn   = "arn:aws:secretsmanager:...:secret:your-qualys-secret"
-    slack_secret_arn   = "arn:aws:secretsmanager:...:secret:your-slack-secret"
-    ```
+### 3. Configure AWS Credentials
 
-4. **Deploy Infrastructure**
+Ensure your AWS credentials are configured locally, e.g. with `aws configure`.
 
-    ```bash
-    cd terraform
-    terraform init
-    terraform apply
-    ```
+### 4. Set Slack Credentials
 
-5. **Deploy Lambda code**
+Obtain your Slack Bot Token and Signing Secret from your Slack App configuration.
 
-    - Ensure your Lambda function code is packaged as `lambda/app.zip`.
-    - Upload or update the Lambda function as needed.
+You can set these as environment variables, or pass them as Terraform variables (see `terraform/variables.tf`).
 
-6. **Configure Slack**
+### 5. Deploy with Terraform
 
-    - Use the API Gateway endpoint output by Terraform to configure your Slack app's event subscription URL.
+```bash
+cd terraform
+terraform init
+terraform apply
+```
 
-## Files & Directories
+Review and approve the proposed changes. This will create the Lambda function, IAM roles, and any other required AWS resources.
 
-- `terraform/` – Terraform IaC for AWS resources
-- `lambda/app.zip` – Python Lambda function package (not included, needs to be built)
-- `README.md` – This documentation
-- `LICENSE` – MIT License
+### 6. Configure Slack
 
-## Outputs
+- Add your Lambda's API Gateway endpoint as a Request URL in your Slack App Event Subscriptions.
+- Subscribe to the required Slack events (see your use case).
+- Install the app to your workspace.
 
-After deployment, Terraform will output:
+## Managing Dependencies
 
-- `slack_api_url` – The endpoint to use in your Slack app configuration
+If you add new imports to `app.py`, update your dependencies:
+
+```bash
+cd lambda
+pip3 freeze > requirements.txt
+```
+
+Or manually add new dependency names to `requirements.txt`.
+
+## .gitignore
+
+Ensure your `.gitignore` contains:
+
+```
+# Lambda deployment packages
+lambda/app.zip
+
+# Python
+__pycache__/
+*.pyc
+
+# Terraform artifacts
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+
+# Secrets (never commit secrets)
+*.env
+terraform/terraform.tfvars
+```
+
+## Notes
+
+- AWS Lambda Python runtimes include `boto3` and `botocore` by default, but you may specify versions in `requirements.txt` if you need to override.
+- Only commit source code and dependency files, not built artifacts like `app.zip`.
+- Always review your AWS and Slack permissions before deploying.
+
+---
 
 ## License
 
-MIT License – see [LICENSE](LICENSE)
+MIT License. See [LICENSE](LICENSE) for details.
