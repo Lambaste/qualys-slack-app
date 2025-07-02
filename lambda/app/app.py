@@ -524,6 +524,9 @@ def update_home_tab(ack, client, event, logger):
         logger.error(f"Error publishing home tab: {e}")
 
 
+#######################
+Athena query - optional
+#######################
 def handle_athena_submission(input_value, input_type, body, client):
     try:
         results = query_athena(input_value, input_type)
