@@ -10,9 +10,6 @@ import boto3
 from botocore.exceptions import ClientError
 import threading
 import concurrent.futures
-#from athena_helper import run_athena_query
-#from config import query, database, output
-
 
 def get_qualys_secret():
 
