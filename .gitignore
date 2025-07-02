@@ -8,6 +8,7 @@ __pycache__/
 
 # terraform
 *.tfstate
+lambda/app.zip
 
 # Distribution / packaging
 .Python
