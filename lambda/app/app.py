@@ -525,7 +525,7 @@ def update_home_tab(ack, client, event, logger):
 
 
 #######################
-Athena query - optional
+#Athena query - optional
 #######################
 def handle_athena_submission(input_value, input_type, body, client):
     try:
